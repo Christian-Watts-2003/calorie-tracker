@@ -144,6 +144,16 @@ function matchScore(query, description, { curatedBonus = 0, hasData = true } = {
     m => descWords.has(m) && !queryWords.includes(m)
   );
 
+  // Leading-food penalty: if the first word of the description is not in the
+  // query, the description likely describes a different primary food that merely
+  // contains a query ingredient (e.g. "Anchovies in olive oil" for "olive oil").
+  const leadingWord = descWordArr[0];
+  const leadingWordInQuery = leadingWord && queryWords.some(qw =>
+    qw === leadingWord ||
+    (Math.min(qw.length, leadingWord.length) >= 5 && (qw.startsWith(leadingWord) || leadingWord.startsWith(qw)))
+  );
+  const hasUnwantedLeadingFood = leadingWord && !leadingWordInQuery && !['the','a','an','and','or','with','in','of'].includes(leadingWord);
+
   // Missing-data penalty: USDA entries with zero calories + protein + fat are
   // placeholder rows with no nutritional information — rank them near the bottom.
   const dataPenalty = hasData ? 1.0 : 0.1;
@@ -151,6 +161,7 @@ function matchScore(query, description, { curatedBonus = 0, hasData = true } = {
   const penalty = hasUnwantedSubstitute ? 0.2
     : hasUnwantedTransformer ? 0.5
     : hasUnwantedEggPart     ? 0.6
+    : hasUnwantedLeadingFood ? 0.35
     : 1.0;
 
   return (recall * 0.8 + lengthPenalty * 0.2) * coreBoost * penalty * dataPenalty + curatedBonus;
