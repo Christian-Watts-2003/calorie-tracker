@@ -185,7 +185,7 @@ function bestMatch(query, foods) {
 async function fetchUSDA(query, dataType) {
   // URLSearchParams encodes commas and spaces in dataType, which USDA rejects.
   // Build base params normally then append dataType with only spaces encoded.
-  const params = new URLSearchParams({ query, pageSize: '8', api_key: USDA_API_KEY });
+  const params = new URLSearchParams({ query, pageSize: '20', api_key: USDA_API_KEY });
   const url = `${USDA_BASE}/foods/search?${params}&dataType=${encodeURIComponent(dataType).replace(/%2C/g, ',')}`;
   const res = await fetch(url);
   if (!res.ok) return [];
