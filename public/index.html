@@ -7,6 +7,103 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── Password gate ── */
+    #gate {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 24px;
+    }
+
+    #gate.hidden { display: none; }
+
+    .gate-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+    }
+
+    .gate-card h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .gate-card p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 22px; }
+
+    .gate-input-wrap { position: relative; margin-bottom: 12px; }
+
+    #gateInput {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1.1rem;
+      letter-spacing: 0.3em;
+      padding: 12px 44px 12px 16px;
+      text-align: center;
+      width: 100%;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    #gateInput:focus { outline: none; border-color: var(--accent); }
+    #gateInput.shake { animation: shake 0.35s ease; border-color: var(--red); }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-8px); }
+      60%      { transform: translateX(8px); }
+      80%      { transform: translateX(-4px); }
+    }
+
+    .gate-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 4px;
+    }
+
+    #gateBtn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px;
+      width: 100%;
+      transition: background 0.2s;
+    }
+
+    #gateBtn:hover { background: var(--accent-hover); }
+
+    #gateError {
+      color: var(--red);
+      font-size: 0.8rem;
+      margin-top: 10px;
+      min-height: 18px;
+    }
+
     :root {
       --bg: #0f1117;
       --surface: #1a1d27;
@@ -598,6 +695,20 @@
   </style>
 </head>
 <body>
+  <!-- Password gate overlay -->
+  <div id="gate">
+    <div class="gate-card">
+      <h2>Calorie Tracker</h2>
+      <p>Enter your password to continue</p>
+      <div class="gate-input-wrap">
+        <input id="gateInput" type="password" placeholder="••••" maxlength="32" autocomplete="current-password">
+        <button class="gate-toggle" id="gateToggle" type="button" aria-label="Show password">👁</button>
+      </div>
+      <button id="gateBtn">Unlock</button>
+      <div id="gateError"></div>
+    </div>
+  </div>
+
   <header>
     <h1>Calorie Tracker</h1>
     <p>Describe your meal in plain English</p>
@@ -686,6 +797,48 @@
   </div>
 
   <script>
+    // ── Password gate ────────────────────────────────────────────────────────
+    const GATE_PASS   = '1234';
+    const GATE_SESSION_KEY = 'ct_authed';
+
+    const gate      = document.getElementById('gate');
+    const gateInput = document.getElementById('gateInput');
+    const gateBtn   = document.getElementById('gateBtn');
+    const gateError = document.getElementById('gateError');
+    const gateToggle = document.getElementById('gateToggle');
+
+    function unlock() {
+      gate.classList.add('hidden');
+    }
+
+    function tryUnlock() {
+      if (gateInput.value === GATE_PASS) {
+        sessionStorage.setItem(GATE_SESSION_KEY, '1');
+        unlock();
+      } else {
+        gateError.textContent = 'Incorrect password';
+        gateInput.classList.remove('shake');
+        void gateInput.offsetWidth; // reflow to restart animation
+        gateInput.classList.add('shake');
+        gateInput.value = '';
+        setTimeout(() => gateInput.classList.remove('shake'), 400);
+      }
+    }
+
+    if (sessionStorage.getItem(GATE_SESSION_KEY) === '1') {
+      unlock();
+    } else {
+      gateInput.focus();
+    }
+
+    gateBtn.addEventListener('click', tryUnlock);
+    gateInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+    gateToggle.addEventListener('click', () => {
+      const show = gateInput.type === 'password';
+      gateInput.type = show ? 'text' : 'password';
+      gateToggle.textContent = show ? '🙈' : '👁';
+    });
+
     // ── Storage ──────────────────────────────────────────────────────────────
     const STORAGE_KEY = 'calorie_tracker_meals';
 
