@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calorie Tracker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #6c8ef5;
+      --accent-hover: #8aa4ff;
+      --text: #e8eaf6;
+      --text-muted: #7986cb;
+      --green: #66bb6a;
+      --orange: #ffa726;
+      --red: #ef5350;
+      --blue: #42a5f5;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-size: 0.9rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    form { display: flex; flex-direction: column; gap: 12px; }
+
+    textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      line-height: 1.5;
+      min-height: 120px;
+      padding: 12px;
+      resize: vertical;
+      width: 100%;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    textarea:focus { outline: none; border-color: var(--accent); }
+    textarea::placeholder { color: var(--text-muted); }
+
+    button[type="submit"] {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button[type="submit"]:hover { background: var(--accent-hover); }
+    button[type="submit"]:active { transform: scale(0.98); }
+    button[type="submit"]:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .examples {
+      margin-top: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .examples span {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-block;
+      margin: 3px 3px 0 0;
+      padding: 3px 10px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .examples span:hover { border-color: var(--accent); color: var(--accent); }
+
+    #status {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      min-height: 20px;
+      text-align: center;
+    }
+
+    #status.error { color: var(--red); }
+
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #results { width: 100%; max-width: 640px; margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+
+    .totals-card {
+      background: linear-gradient(135deg, #1e2540, #1a2038);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .totals-card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+    }
+
+    .macro-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .macro-cell {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .macro-cell .val {
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .macro-cell .lbl {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    .cal .val { color: var(--orange); }
+    .pro .val { color: var(--green); }
+    .car .val { color: var(--blue); }
+    .fat .val { color: var(--red); }
+
+    .items-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .item-card.not-found { opacity: 0.6; border-style: dashed; }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .item-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-transform: capitalize;
+    }
+
+    .item-grams {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      white-space: nowrap;
+      padding-top: 2px;
+    }
+
+    .matched-name {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-bottom: 10px;
+      font-style: italic;
+    }
+
+    .item-macros {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .item-macro {
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 6px 4px;
+      text-align: center;
+    }
+
+    .item-macro .v { font-size: 0.95rem; font-weight: 600; }
+    .item-macro .l { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 1px; }
+
+    .not-found-msg { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+
+    @media (max-width: 360px) {
+      .macro-grid, .item-macros { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Calorie Tracker</h1>
+    <p>Describe your meal in plain English</p>
+  </header>
+
+  <div class="card">
+    <form id="mealForm">
+      <textarea
+        id="mealInput"
+        placeholder="e.g. 2 eggs, a cup of oatmeal with a handful of blueberries, and a glass of orange juice"
+        rows="4"
+      ></textarea>
+      <div class="examples">
+        Try:
+        <span>2 scrambled eggs and toast</span>
+        <span>chicken breast with rice and broccoli</span>
+        <span>a bowl of pasta with marinara</span>
+      </div>
+      <button type="submit" id="submitBtn">Analyze Meal</button>
+    </form>
+    <div id="status"></div>
+  </div>
+
+  <div id="results"></div>
+
+  <script>
+    const form = document.getElementById('mealForm');
+    const input = document.getElementById('mealInput');
+    const btn = document.getElementById('submitBtn');
+    const status = document.getElementById('status');
+    const results = document.getElementById('results');
+
+    document.querySelectorAll('.examples span').forEach(chip => {
+      chip.addEventListener('click', () => {
+        input.value = chip.textContent;
+        input.focus();
+      });
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const description = input.value.trim();
+      if (!description) return;
+
+      btn.disabled = true;
+      status.className = '';
+      status.innerHTML = '<span class="spinner"></span>Parsing meal with AI...';
+      results.innerHTML = '';
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+
+        status.innerHTML = '';
+        renderResults(data);
+      } catch (err) {
+        status.className = 'error';
+        status.textContent = `Error: ${err.message}`;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    function renderResults({ items, totals }) {
+      const html = `
+        <div class="totals-card">
+          <h2>Total Nutrition</h2>
+          <div class="macro-grid">
+            <div class="macro-cell cal">
+              <div class="val">${totals.calories}</div>
+              <div class="lbl">Calories</div>
+            </div>
+            <div class="macro-cell pro">
+              <div class="val">${totals.protein}g</div>
+              <div class="lbl">Protein</div>
+            </div>
+            <div class="macro-cell car">
+              <div class="val">${totals.carbs}g</div>
+              <div class="lbl">Carbs</div>
+            </div>
+            <div class="macro-cell fat">
+              <div class="val">${totals.fat}g</div>
+              <div class="lbl">Fat</div>
+            </div>
+          </div>
+        </div>
+        <div class="items-list">
+          ${items.map(renderItem).join('')}
+        </div>
+      `;
+      results.innerHTML = html;
+    }
+
+    function renderItem(item) {
+      if (!item.found) {
+        return `
+          <div class="item-card not-found">
+            <div class="item-header">
+              <div class="item-name">${escHtml(item.food_name)}</div>
+              <div class="item-grams">${item.grams}g</div>
+            </div>
+            <div class="not-found-msg">Could not find nutritional data</div>
+          </div>`;
+      }
+
+      return `
+        <div class="item-card">
+          <div class="item-header">
+            <div class="item-name">${escHtml(item.food_name)}</div>
+            <div class="item-grams">${item.grams}g</div>
+          </div>
+          ${item.matched_name ? `<div class="matched-name">Matched: ${escHtml(item.matched_name)}</div>` : ''}
+          <div class="item-macros">
+            <div class="item-macro">
+              <div class="v" style="color:var(--orange)">${item.calories}</div>
+              <div class="l">kcal</div>
+            </div>
+            <div class="item-macro">
+              <div class="v" style="color:var(--green)">${item.protein}g</div>
+              <div class="l">protein</div>
+            </div>
+            <div class="item-macro">
+              <div class="v" style="color:var(--blue)">${item.carbs}g</div>
+              <div class="l">carbs</div>
+            </div>
+            <div class="item-macro">
+              <div class="v" style="color:var(--red)">${item.fat}g</div>
+              <div class="l">fat</div>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function escHtml(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>
