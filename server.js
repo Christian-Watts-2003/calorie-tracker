@@ -73,6 +73,9 @@ const TYPE_TRANSFORMERS = new Set([
   'paste','spread','flakes','chips','drink','beverage','supplement',
   'sticks','jerky','nuggets','strips','burger',
   'peanut','canola','soybean','sunflower','palm','safflower','grapeseed',
+  // preparation-state / diet-modifier qualifiers: these indicate a specific
+  // variant the user didn't ask for (e.g. "low sodium", "unprepared")
+  'sodium','unprepared',
 ]);
 
 // Egg-part words: "egg white" or "egg yolk" are subsets of "eggs".
