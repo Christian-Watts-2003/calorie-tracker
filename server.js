@@ -43,35 +43,78 @@ Meal: ${description}`
   return JSON.parse(match[0]);
 }
 
+const normalize = s => s.toLowerCase().replace(/[-_]/g, ' ').replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+
+// Words that signal a food substitute. Penalised when absent from the query,
+// so "bacon" doesn't match "Bacon, meatless".
+const SUBSTITUTE_MARKERS = new Set([
+  'meatless','imitation','substitute','artificial','flavored','flavoured',
+  'analog','analogue','tofu','vegan','vegetarian',
+  // game/exotic animals — penalise when not in the query so "ribeye steak"
+  // doesn't match "Game meat, bison, ribeye..."
+  'bison','venison','buffalo','elk','ostrich','emu','alligator','game',
+]);
+
+// Words that transform a food into a different product category. If present
+// in the description but NOT in the query, the match is likely wrong —
+// e.g. "avocado" should not match "Oil, avocado".
+const TYPE_TRANSFORMERS = new Set(['oil','juice','powder','extract','sauce','milk','cream','flour','syrup','paste','spread','flakes','chips','drink','beverage','supplement']);
+
 // Score how well a USDA food description matches the query.
 // Returns 0–1; higher is better.
-function matchScore(query, description) {
-  const normalize = s => s.toLowerCase().replace(/[-_]/g, ' ').replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+function matchScore(query, description, { curatedBonus = 0 } = {}) {
   const queryWords = normalize(query);
-  const descWords  = new Set(normalize(description));
+  const descWordArr = normalize(description);
+  const descWords   = new Set(descWordArr);
 
   if (queryWords.length === 0) return 0;
 
-  // Fraction of query words found in the description
-  const hits = queryWords.filter(w => descWords.has(w)).length;
-  const recall = hits / queryWords.length;
+  // Stem-aware hit: a query word matches if it equals a desc word OR if
+  // one is a prefix of the other (min 5 chars), catching plural/singular
+  // mismatches like "avocado" vs "avocados".
+  function hits(qw) {
+    if (descWords.has(qw)) return true;
+    if (qw.length >= 5) {
+      for (const dw of descWords) {
+        if (dw.startsWith(qw) || qw.startsWith(dw)) return true;
+      }
+    }
+    return false;
+  }
 
-  // Penalise very long descriptions (branded items tend to be verbose)
-  const lengthPenalty = Math.min(1, 10 / Math.max(10, descWords.size));
+  const matchedCount = queryWords.filter(hits).length;
+  const recall = matchedCount / queryWords.length;
 
-  // The last word in the query is the primary food noun (e.g. "bacon" in
-  // "low-fat bacon"). If it's absent from the description, heavily penalise
-  // so that modifier-only matches (e.g. "Buttermilk, low fat") don't win.
+  // Penalise long descriptions (branded items tend to be verbose)
+  const lengthPenalty = Math.min(1, 10 / Math.max(10, descWordArr.length));
+
+  // Core-noun guard: the last query word is the primary food (e.g. "bacon").
+  // If absent from description, crush the score so modifier-only matches lose.
   const coreWord = queryWords[queryWords.length - 1];
-  const coreBoost = descWords.has(coreWord) ? 1.0 : 0.15;
+  const coreBoost = hits(coreWord) ? 1.0 : 0.15;
 
-  return (recall * 0.85 + lengthPenalty * 0.15) * coreBoost;
+  // Substitute penalty: description contains a substitute marker the query
+  // doesn't mention → likely wrong product.
+  const hasUnwantedSubstitute = [...SUBSTITUTE_MARKERS].some(
+    m => descWords.has(m) && !queryWords.includes(m)
+  );
+
+  // Transformer penalty: description contains a category-shifting word
+  // (oil, juice, powder…) the query doesn't mention → wrong form of the food.
+  const hasUnwantedTransformer = [...TYPE_TRANSFORMERS].some(
+    m => descWords.has(m) && !queryWords.includes(m)
+  );
+
+  const penalty = hasUnwantedSubstitute ? 0.2 : hasUnwantedTransformer ? 0.5 : 1.0;
+
+  return (recall * 0.8 + lengthPenalty * 0.2) * coreBoost * penalty + curatedBonus;
 }
 
 function bestMatch(query, foods) {
   let best = null, bestScore = -1;
   for (const food of foods) {
-    const score = matchScore(query, food.description);
+    const isCurated = food.dataType === 'Foundation' || food.dataType === 'SR Legacy';
+    const score = matchScore(query, food.description, { curatedBonus: isCurated ? 0.1 : 0 });
     if (score > bestScore) { bestScore = score; best = food; }
   }
   return best;
@@ -80,7 +123,7 @@ function bestMatch(query, foods) {
 async function fetchUSDA(query, dataType) {
   // URLSearchParams encodes commas and spaces in dataType, which USDA rejects.
   // Build the base params normally, then append dataType raw.
-  const params = new URLSearchParams({ query, pageSize: '5', api_key: USDA_API_KEY });
+  const params = new URLSearchParams({ query, pageSize: '8', api_key: USDA_API_KEY });
   const url = `${USDA_BASE}/foods/search?${params}&dataType=${dataType.replace(/ /g, '%20')}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`USDA search failed: ${res.status}`);
@@ -89,11 +132,9 @@ async function fetchUSDA(query, dataType) {
 }
 
 async function searchUSDA(foodName) {
-  // Prefer Foundation + SR Legacy (curated, generic foods)
-  const curated = await fetchUSDA(foodName, 'Foundation,SR Legacy');
-  if (curated.length > 0) return bestMatch(foodName, curated);
-
-  // Fall back to all data types (includes Branded) if nothing curated found
+  // Search all data types at once so branded products can win when the query
+  // is clearly brand-specific. Foundation/SR Legacy entries get a +0.1 score
+  // bonus in bestMatch so they still win for generic queries like "eggs".
   const all = await fetchUSDA(foodName, 'Foundation,SR Legacy,Branded,Survey (FNDDS)');
   if (all.length === 0) return null;
   return bestMatch(foodName, all);
