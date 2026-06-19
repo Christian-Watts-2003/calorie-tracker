@@ -910,6 +910,14 @@
               <option value="1.9">Extra active (athlete / physical job)</option>
             </select>
           </div>
+          <div class="profile-field">
+            <label for="pWeight">Weight (kg)</label>
+            <input id="pWeight" type="number" min="30" max="300" step="0.1" placeholder="80.0">
+          </div>
+          <div class="profile-field">
+            <label for="pBodyFat">Body Fat % <span style="font-weight:400;text-transform:none">(optional)</span></label>
+            <input id="pBodyFat" type="number" min="3" max="60" step="0.1" placeholder="20.0">
+          </div>
         </div>
         <div class="profile-actions">
           <button class="profile-save-btn" id="profileSaveBtn">Save Profile</button>
@@ -1596,10 +1604,10 @@
     };
 
     function calcTargets(profile, bodyRows) {
-      // Use most recent RENPHO weight & body fat if available, else no body data
+      // Prefer most recent RENPHO weight/body fat; fall back to profile values
       const latest = bodyRows.length ? bodyRows[bodyRows.length - 1] : null;
-      const weight = latest?.weight ?? null;
-      const bodyFatPct = latest?.bodyFat ?? null;
+      const weight     = latest?.weight    ?? profile.weight   ?? null;
+      const bodyFatPct = latest?.bodyFat   ?? profile.bodyFat  ?? null;
 
       if (!weight) return null;
 
@@ -1677,11 +1685,13 @@
         document.getElementById('pAge').value      = p.age;
         document.getElementById('pSex').value      = p.sex;
         document.getElementById('pActivity').value = p.activity;
+        document.getElementById('pWeight').value   = p.weight ?? '';
+        document.getElementById('pBodyFat').value  = p.bodyFat ?? '';
 
         form.style.display    = 'none';
         summary.style.display = '';
         document.getElementById('profileSummaryText').textContent =
-          `${p.height} cm · ${p.age} yrs · ${p.sex === 'male' ? 'Male' : 'Female'} · ${ACTIVITY_LABELS[p.activity] ?? p.activity}`;
+          `${p.height} cm · ${p.age} yrs · ${p.sex === 'male' ? 'Male' : 'Female'} · ${p.weight} kg · ${ACTIVITY_LABELS[p.activity] ?? p.activity}`;
       } else {
         form.style.display    = '';
         summary.style.display = 'none';
@@ -1695,13 +1705,19 @@
       const age      = parseInt(document.getElementById('pAge').value);
       const sex      = document.getElementById('pSex').value;
       const activity = document.getElementById('pActivity').value;
+      const weight   = parseFloat(document.getElementById('pWeight').value) || null;
+      const bodyFat  = parseFloat(document.getElementById('pBodyFat').value) || null;
 
       if (!height || !age || height < 100 || age < 10) {
         alert('Please enter a valid height and age.');
         return;
       }
+      if (!weight) {
+        alert('Please enter your current weight.');
+        return;
+      }
 
-      saveProfile({ height, age, sex, activity });
+      saveProfile({ height, age, sex, activity, weight, bodyFat });
       renderProfileUI();
     });
 
