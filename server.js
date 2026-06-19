@@ -57,6 +57,9 @@ const SUBSTITUTE_MARKERS = new Set([
   // safe to add because the penalty only fires when NOT in the query,
   // so "turkey bacon" / "turkey breast" etc. are unaffected.
   'turkey',
+  // regional/style variants that are different products: "canadian" style bacon
+  // is back meat (ham-like), not streaky bacon; penalise when not in query.
+  'canadian',
 ]);
 
 // Words that transform a food into a different product category. If present
