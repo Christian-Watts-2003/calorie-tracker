@@ -150,12 +150,21 @@ function matchScore(query, description, { curatedBonus = 0, hasData = true } = {
   // Leading-food penalty: if the first word of the description is not in the
   // query, the description likely describes a different primary food that merely
   // contains a query ingredient (e.g. "Anchovies in olive oil" for "olive oil").
+  // Skip the penalty when most of the description's words ARE query words —
+  // that pattern means the leading word is a brand prefix, not a different food
+  // (e.g. "MISSION, CARB BALANCE FLOUR TORTILLAS" for "carb balance flour tortillas").
   const leadingWord = descWordArr[0];
   const leadingWordInQuery = leadingWord && queryWords.some(qw =>
     qw === leadingWord ||
     (Math.min(qw.length, leadingWord.length) >= 5 && (qw.startsWith(leadingWord) || leadingWord.startsWith(qw)))
   );
-  const hasUnwantedLeadingFood = leadingWord && !leadingWordInQuery && !['the','a','an','and','or','with','in','of'].includes(leadingWord);
+  const descCoverage = descWordArr.filter(w =>
+    queryWords.includes(w) ||
+    (w.length >= 5 && queryWords.some(qw => qw.startsWith(w) || w.startsWith(qw)))
+  ).length / descWordArr.length;
+  const hasUnwantedLeadingFood = leadingWord && !leadingWordInQuery
+    && !['the','a','an','and','or','with','in','of'].includes(leadingWord)
+    && descCoverage < 0.65;
 
   // Missing-data penalty: USDA entries with zero calories + protein + fat are
   // placeholder rows with no nutritional information — rank them near the bottom.
