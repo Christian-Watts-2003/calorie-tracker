@@ -549,6 +549,35 @@
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .unit-toggle {
+      display: inline-flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-left: auto;
+    }
+
+    .unit-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      text-transform: uppercase;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .unit-btn.active {
+      background: var(--accent);
+      color: #fff;
     }
 
     .profile-field input,
@@ -911,8 +940,14 @@
             </select>
           </div>
           <div class="profile-field">
-            <label for="pWeight">Weight (kg)</label>
-            <input id="pWeight" type="number" min="30" max="300" step="0.1" placeholder="80.0">
+            <label for="pWeight">
+              Weight
+              <span class="unit-toggle" id="weightUnitToggle">
+                <button type="button" class="unit-btn active" data-unit="kg">kg</button>
+                <button type="button" class="unit-btn" data-unit="lbs">lbs</button>
+              </span>
+            </label>
+            <input id="pWeight" type="number" min="30" max="700" step="0.1" placeholder="80.0">
           </div>
           <div class="profile-field">
             <label for="pBodyFat">Body Fat % <span style="font-weight:400;text-transform:none">(optional)</span></label>
@@ -1319,7 +1354,8 @@
     // values are arrays of possible CSV header names (RENPHO header text varies
     // by app version and locale).
     const RENPHO_FIELDS = [
-      { key: 'weight',       label: 'Weight (kg)',         cols: ['Weight(kg)', 'Weight (kg)', 'weight_kg', 'Weight'] },
+      { key: 'weight',       label: 'Weight (kg)',         cols: ['Weight(kg)', 'Weight (kg)', 'weight_kg'] },
+      { key: 'weightLbs',    label: 'Weight (lbs)',        cols: ['Weight(lbs)', 'Weight (lbs)', 'weight_lbs'] },
       { key: 'bmi',          label: 'BMI',                 cols: ['BMI', 'bmi'] },
       { key: 'bodyFat',      label: 'Body Fat %',          cols: ['Body Fat(%)', 'Body Fat (%)', 'body_fat_percentage', 'Body Fat'] },
       { key: 'fatFreeWeight',label: 'Fat-Free Weight (kg)',cols: ['Fat-free Body Weight(kg)', 'Fat-free Body Weight (kg)', 'fat_free_body_weight_kg'] },
@@ -1380,6 +1416,12 @@
           const v = parseFloat(cells[idx]);
           if (!isNaN(v)) entry[key] = v;
         }
+        // Convert lbs weight to kg if the CSV used imperial units
+        if (entry.weightLbs != null && entry.weight == null) {
+          entry.weight = Math.round(entry.weightLbs / 2.20462 * 10) / 10;
+        }
+        delete entry.weightLbs;
+
         if (Object.keys(entry).length > 1) rows.push(entry);
       }
 
@@ -1685,8 +1727,16 @@
         document.getElementById('pAge').value      = p.age;
         document.getElementById('pSex').value      = p.sex;
         document.getElementById('pActivity').value = p.activity;
-        document.getElementById('pWeight').value   = p.weight ?? '';
         document.getElementById('pBodyFat').value  = p.bodyFat ?? '';
+        // Restore unit toggle and show weight in saved unit
+        weightUnit = p.weightUnit || 'kg';
+        document.querySelectorAll('#weightUnitToggle .unit-btn').forEach(b =>
+          b.classList.toggle('active', b.dataset.unit === weightUnit)
+        );
+        const displayWeight = weightUnit === 'lbs'
+          ? Math.round(p.weight * 2.20462 * 10) / 10
+          : p.weight;
+        document.getElementById('pWeight').value = displayWeight ?? '';
 
         form.style.display    = 'none';
         summary.style.display = '';
@@ -1700,24 +1750,40 @@
       renderTargets();
     }
 
+    // Weight unit toggle
+    let weightUnit = 'kg';
+    document.getElementById('weightUnitToggle').addEventListener('click', e => {
+      const btn = e.target.closest('.unit-btn');
+      if (!btn) return;
+      weightUnit = btn.dataset.unit;
+      document.querySelectorAll('#weightUnitToggle .unit-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.unit === weightUnit)
+      );
+      // Update placeholder
+      document.getElementById('pWeight').placeholder = weightUnit === 'lbs' ? '176' : '80.0';
+    });
+
     document.getElementById('profileSaveBtn').addEventListener('click', () => {
       const height   = parseFloat(document.getElementById('pHeight').value);
       const age      = parseInt(document.getElementById('pAge').value);
       const sex      = document.getElementById('pSex').value;
       const activity = document.getElementById('pActivity').value;
-      const weight   = parseFloat(document.getElementById('pWeight').value) || null;
+      const rawWeight = parseFloat(document.getElementById('pWeight').value) || null;
       const bodyFat  = parseFloat(document.getElementById('pBodyFat').value) || null;
 
       if (!height || !age || height < 100 || age < 10) {
         alert('Please enter a valid height and age.');
         return;
       }
-      if (!weight) {
+      if (!rawWeight) {
         alert('Please enter your current weight.');
         return;
       }
 
-      saveProfile({ height, age, sex, activity, weight, bodyFat });
+      // Always store weight in kg internally
+      const weight = weightUnit === 'lbs' ? Math.round(rawWeight / 2.20462 * 10) / 10 : rawWeight;
+
+      saveProfile({ height, age, sex, activity, weight, bodyFat, weightUnit });
       renderProfileUI();
     });
 
