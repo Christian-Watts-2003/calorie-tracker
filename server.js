@@ -197,18 +197,24 @@ async function fetchUSDA(query, dataType, pageSize = '20') {
 }
 
 async function searchUSDA(foodName) {
-  // Fetch curated and branded pools in parallel. Merging them before scoring
-  // ensures Foundation/SR Legacy entries are always in the candidate pool —
-  // a single combined API call lets USDA's own ranking bury them past our
-  // page limit when a branded exact-name match sits at position 1.
-  // Use a larger page size for the curated pool since there are fewer entries
-  // and they can rank lower than branded results in USDA's relevance ordering.
   const [curated, branded] = await Promise.all([
     fetchUSDA(foodName, 'Foundation,SR Legacy', '50'),
     fetchUSDA(foodName, 'Branded,Survey (FNDDS)', '20'),
   ]);
   const all = [...curated, ...branded];
   if (all.length === 0) return null;
+
+  // Debug: log all candidates with scores so we can see what the pool looks like
+  if (process.env.DEBUG_USDA) {
+    const scored = all.map(f => {
+      const bonus = f.dataType === 'Foundation' ? 0.15 : f.dataType === 'SR Legacy' ? 0.05 : 0;
+      const score = matchScore(foodName, f.description, { curatedBonus: bonus, hasData: hasUsefulNutrientData(f) });
+      return { score, type: f.dataType, desc: f.description };
+    }).sort((a, b) => b.score - a.score).slice(0, 10);
+    console.log(`\n[USDA debug] query="${foodName}" top candidates:`);
+    scored.forEach(s => console.log(`  ${s.score.toFixed(3)} [${s.type}] ${s.desc}`));
+  }
+
   return bestMatch(foodName, all);
 }
 
