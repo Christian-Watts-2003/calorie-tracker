@@ -419,9 +419,181 @@
     .week-macro .wv { font-size: 1.1rem; font-weight: 700; }
     .week-macro .wl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
 
+    /* ── Body tab ── */
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .upload-area:hover, .upload-area.drag-over {
+      border-color: var(--accent);
+      background: rgba(108,142,245,0.06);
+    }
+
+    .upload-area input[type="file"] { display: none; }
+
+    .upload-icon { font-size: 2rem; margin-bottom: 10px; }
+
+    .upload-area p { color: var(--text-muted); font-size: 0.9rem; margin-top: 6px; }
+
+    .upload-area strong { color: var(--text); }
+
+    .upload-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 14px;
+      padding: 10px 22px;
+      transition: background 0.2s;
+    }
+
+    .upload-btn:hover { background: var(--accent-hover); }
+
+    .body-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .body-stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .body-stat-card .stat-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .body-stat-card .stat-val {
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .body-stat-card .stat-delta {
+      font-size: 0.75rem;
+      margin-top: 4px;
+    }
+
+    .delta-up   { color: var(--red); }
+    .delta-down { color: var(--green); }
+    .delta-flat { color: var(--text-muted); }
+
+    /* SVG line chart */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px 12px;
+    }
+
+    .chart-card h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 12px;
+    }
+
+    .chart-wrap { position: relative; }
+
+    .chart-wrap svg { display: block; width: 100%; overflow: visible; }
+
+    .chart-selector {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .chart-pill {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      transition: all 0.15s;
+    }
+
+    .chart-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .body-history-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .body-history-card table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .body-history-card th {
+      background: var(--surface2);
+      color: var(--text-muted);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 9px 10px;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .body-history-card th:first-child { text-align: left; }
+
+    .body-history-card td {
+      border-top: 1px solid var(--border);
+      padding: 9px 10px;
+      text-align: right;
+      color: var(--text-muted);
+    }
+
+    .body-history-card td:first-child { text-align: left; color: var(--text); }
+
+    .body-history-card tr:hover td { background: var(--surface2); }
+
+    .clear-body-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      transition: all 0.15s;
+    }
+
+    .clear-body-btn:hover { border-color: var(--red); color: var(--red); }
+
     @media (max-width: 360px) {
       .macro-grid, .item-macros { grid-template-columns: repeat(2, 1fr); }
       .meal-desc { max-width: 100px; }
+      .body-stats-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -435,6 +607,7 @@
     <button class="tab-btn active" data-tab="log">Log Meal</button>
     <button class="tab-btn" data-tab="today">Today</button>
     <button class="tab-btn" data-tab="week">This Week</button>
+    <button class="tab-btn" data-tab="body">Body</button>
   </nav>
 
   <!-- LOG MEAL TAB -->
@@ -467,6 +640,37 @@
         <span class="section-title">Today's Meals</span>
       </div>
       <div class="history-card" id="today-table"></div>
+    </div>
+  </div>
+
+  <!-- BODY TAB -->
+  <div class="panel hidden" id="tab-body">
+    <!-- Upload card -->
+    <div class="card" id="body-upload-card">
+      <label class="upload-area" id="uploadArea">
+        <input type="file" id="csvInput" accept=".csv">
+        <div class="upload-icon">📊</div>
+        <strong>Upload RENPHO CSV export</strong>
+        <p>Drag &amp; drop or click to browse</p>
+        <p style="margin-top:4px;font-size:0.75rem">Weight, body fat, muscle mass, BMI and more</p>
+        <button class="upload-btn" type="button" onclick="document.getElementById('csvInput').click();event.stopPropagation()">Choose File</button>
+      </label>
+    </div>
+    <!-- Latest stats summary -->
+    <div id="body-stats"></div>
+    <!-- Chart -->
+    <div class="chart-card" id="body-chart-card" style="display:none">
+      <h3>Trend</h3>
+      <div class="chart-selector" id="chartPills"></div>
+      <div class="chart-wrap" id="chartWrap"></div>
+    </div>
+    <!-- History table -->
+    <div id="body-history-wrap" style="display:none">
+      <div class="section-header" style="margin-bottom:10px">
+        <span class="section-title">Measurement History</span>
+        <button class="clear-body-btn" id="clearBodyBtn">Clear all</button>
+      </div>
+      <div class="body-history-card" id="body-history-table"></div>
     </div>
   </div>
 
@@ -525,6 +729,7 @@
         document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
         if (btn.dataset.tab === 'today') renderToday();
         if (btn.dataset.tab === 'week')  renderWeek();
+        if (btn.dataset.tab === 'body')  renderBody();
       });
     });
 
@@ -760,7 +965,287 @@
       const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
       if (activeTab === 'today') renderToday();
       if (activeTab === 'week')  renderWeek();
+      if (activeTab === 'body')  renderBody();
     }
+
+    // ── Body data storage ────────────────────────────────────────────────────
+    const BODY_KEY = 'calorie_tracker_body';
+
+    function loadBodyData() {
+      try { return JSON.parse(localStorage.getItem(BODY_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveBodyData(rows) {
+      localStorage.setItem(BODY_KEY, JSON.stringify(rows));
+    }
+
+    // RENPHO CSV column mappings. Keys are the display label used in the UI;
+    // values are arrays of possible CSV header names (RENPHO header text varies
+    // by app version and locale).
+    const RENPHO_FIELDS = [
+      { key: 'weight',       label: 'Weight (kg)',         cols: ['Weight(kg)', 'Weight (kg)', 'weight_kg', 'Weight'] },
+      { key: 'bmi',          label: 'BMI',                 cols: ['BMI', 'bmi'] },
+      { key: 'bodyFat',      label: 'Body Fat %',          cols: ['Body Fat(%)', 'Body Fat (%)', 'body_fat_percentage', 'Body Fat'] },
+      { key: 'fatFreeWeight',label: 'Fat-Free Weight (kg)',cols: ['Fat-free Body Weight(kg)', 'Fat-free Body Weight (kg)', 'fat_free_body_weight_kg'] },
+      { key: 'subcutFat',    label: 'Subcutaneous Fat %',  cols: ['Subcutaneous Fat(%)', 'Subcutaneous Fat (%)', 'subcutaneous_fat'] },
+      { key: 'visceralFat',  label: 'Visceral Fat',        cols: ['Visceral Fat', 'visceral_fat'] },
+      { key: 'bodyWater',    label: 'Body Water %',        cols: ['Body Water(%)', 'Body Water (%)', 'body_water'] },
+      { key: 'skeletalMuscle',label:'Skeletal Muscle %',   cols: ['Skeletal Muscle(%)', 'Skeletal Muscle (%)', 'skeletal_muscle'] },
+      { key: 'muscleMass',   label: 'Muscle Mass (kg)',    cols: ['Muscle Mass(kg)', 'Muscle Mass (kg)', 'muscle_mass_kg', 'Muscle Mass'] },
+      { key: 'boneMass',     label: 'Bone Mass (kg)',      cols: ['Bone Mass(kg)', 'Bone Mass (kg)', 'bone_mass_kg', 'Bone Mass'] },
+      { key: 'protein',      label: 'Protein %',           cols: ['Protein(%)', 'Protein (%)', 'protein'] },
+      { key: 'bmr',          label: 'BMR (kcal)',          cols: ['BMR(kcal)', 'BMR (kcal)', 'bmr_kcal', 'BMR'] },
+      { key: 'metabolicAge', label: 'Metabolic Age',       cols: ['Metabolic Age', 'metabolic_age'] },
+    ];
+
+    function parseRenphoCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      if (lines.length < 2) throw new Error('CSV has no data rows');
+
+      // Parse header row — handle quoted fields
+      const parseRow = line => {
+        const out = []; let cur = ''; let inQ = false;
+        for (const ch of line) {
+          if (ch === '"') { inQ = !inQ; }
+          else if (ch === ',' && !inQ) { out.push(cur.trim()); cur = ''; }
+          else cur += ch;
+        }
+        out.push(cur.trim());
+        return out;
+      };
+
+      const headers = parseRow(lines[0]);
+
+      // Map our known fields to column indices
+      const colMap = {};
+      for (const field of RENPHO_FIELDS) {
+        for (const col of field.cols) {
+          const idx = headers.findIndex(h => h.trim().replace(/"/g,'') === col);
+          if (idx !== -1) { colMap[field.key] = idx; break; }
+        }
+      }
+
+      // Find date/time column
+      const dateIdx = headers.findIndex(h => /time of measurement|date|timestamp/i.test(h));
+
+      if (dateIdx === -1 && Object.keys(colMap).length === 0)
+        throw new Error('Does not look like a RENPHO export — no recognised columns found');
+
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const cells = parseRow(lines[i]);
+        const dateStr = dateIdx !== -1 ? cells[dateIdx]?.replace(/"/g,'').trim() : null;
+        const ts = dateStr ? Date.parse(dateStr) : null;
+        if (!ts || isNaN(ts)) continue;
+
+        const entry = { ts };
+        for (const [key, idx] of Object.entries(colMap)) {
+          const v = parseFloat(cells[idx]);
+          if (!isNaN(v)) entry[key] = v;
+        }
+        if (Object.keys(entry).length > 1) rows.push(entry);
+      }
+
+      if (rows.length === 0) throw new Error('No valid measurement rows found in CSV');
+      return rows.sort((a, b) => a.ts - b.ts);
+    }
+
+    function mergeBodyData(existing, incoming) {
+      // Merge by timestamp — incoming overwrites existing for same ts
+      const map = new Map(existing.map(r => [r.ts, r]));
+      for (const r of incoming) map.set(r.ts, { ...map.get(r.ts), ...r });
+      return [...map.values()].sort((a, b) => a.ts - b.ts);
+    }
+
+    // ── CSV upload handling ──────────────────────────────────────────────────
+    const csvInput   = document.getElementById('csvInput');
+    const uploadArea = document.getElementById('uploadArea');
+
+    function handleCSVFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const incoming = parseRenphoCSV(e.target.result);
+          const merged   = mergeBodyData(loadBodyData(), incoming);
+          saveBodyData(merged);
+          renderBody();
+        } catch (err) {
+          alert('Could not parse CSV: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    csvInput.addEventListener('change', e => handleCSVFile(e.target.files[0]));
+
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.classList.remove('drag-over');
+      handleCSVFile(e.dataTransfer.files[0]);
+    });
+    uploadArea.addEventListener('click', e => {
+      if (e.target.tagName !== 'BUTTON') csvInput.click();
+    });
+
+    document.getElementById('clearBodyBtn').addEventListener('click', () => {
+      if (confirm('Delete all body measurement data?')) {
+        saveBodyData([]);
+        renderBody();
+      }
+    });
+
+    // ── Body tab renderer ────────────────────────────────────────────────────
+    let activeBodyField = 'weight';
+
+    function renderBody() {
+      const rows = loadBodyData();
+      const hasData = rows.length > 0;
+
+      document.getElementById('body-chart-card').style.display   = hasData ? '' : 'none';
+      document.getElementById('body-history-wrap').style.display = hasData ? '' : 'none';
+
+      if (!hasData) {
+        document.getElementById('body-stats').innerHTML = '';
+        return;
+      }
+
+      // Latest and previous readings
+      const latest = rows[rows.length - 1];
+      const prev   = rows.length > 1 ? rows[rows.length - 2] : null;
+
+      // Determine which fields we actually have data for
+      const availableFields = RENPHO_FIELDS.filter(f => latest[f.key] != null);
+
+      // Stats summary grid (show up to 8 most informative fields)
+      const PRIORITY = ['weight','bodyFat','muscleMass','bmi','visceralFat','bmr','bodyWater','metabolicAge'];
+      const statFields = PRIORITY.map(k => availableFields.find(f => f.key === k)).filter(Boolean).slice(0, 8);
+
+      document.getElementById('body-stats').innerHTML = statFields.length ? `
+        <div class="body-stats-grid">
+          ${statFields.map(f => {
+            const cur = latest[f.key];
+            const old = prev?.[f.key];
+            let deltaHTML = '';
+            if (old != null) {
+              const diff = +(cur - old).toFixed(2);
+              const sign = diff > 0 ? '+' : '';
+              // For body fat and visceral fat, up is bad; for most others same
+              const badUp = ['bodyFat','visceralFat','subcutFat','bmi','metabolicAge'].includes(f.key);
+              const cls = diff === 0 ? 'delta-flat' : (diff > 0 === badUp ? 'delta-up' : 'delta-down');
+              deltaHTML = `<div class="stat-delta ${cls}">${sign}${diff} vs prev</div>`;
+            }
+            return `
+              <div class="body-stat-card">
+                <div class="stat-label">${escHtml(f.label)}</div>
+                <div class="stat-val">${cur}</div>
+                ${deltaHTML}
+              </div>`;
+          }).join('')}
+        </div>` : '';
+
+      // Chart pills — only fields with ≥2 data points
+      const chartFields = availableFields.filter(f => rows.filter(r => r[f.key] != null).length >= 2);
+      if (!chartFields.find(f => f.key === activeBodyField)) {
+        activeBodyField = chartFields[0]?.key || 'weight';
+      }
+
+      document.getElementById('chartPills').innerHTML = chartFields.map(f => `
+        <button class="chart-pill ${f.key === activeBodyField ? 'active' : ''}" data-field="${escHtml(f.key)}">${escHtml(f.label)}</button>
+      `).join('');
+
+      renderBodyChart(rows, activeBodyField);
+      renderBodyTable(rows, availableFields);
+    }
+
+    function renderBodyChart(rows, fieldKey) {
+      const field = RENPHO_FIELDS.find(f => f.key === fieldKey);
+      const points = rows.map(r => ({ ts: r.ts, v: r[fieldKey] })).filter(p => p.v != null);
+      if (points.length < 2) { document.getElementById('chartWrap').innerHTML = ''; return; }
+
+      const W = 580, H = 160, PL = 44, PR = 12, PT = 10, PB = 28;
+      const iW = W - PL - PR, iH = H - PT - PB;
+
+      const minV = Math.min(...points.map(p => p.v));
+      const maxV = Math.max(...points.map(p => p.v));
+      const rangeV = maxV - minV || 1;
+      const minT = points[0].ts, maxT = points[points.length-1].ts;
+      const rangeT = maxT - minT || 1;
+
+      const px = t => PL + ((t - minT) / rangeT) * iW;
+      const py = v => PT + iH - ((v - minV) / rangeV) * iH;
+
+      const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${px(p.ts).toFixed(1)},${py(p.v).toFixed(1)}`).join(' ');
+      // Closed fill path
+      const fillD = pathD + ` L${px(points[points.length-1].ts).toFixed(1)},${(PT+iH).toFixed(1)} L${px(points[0].ts).toFixed(1)},${(PT+iH).toFixed(1)} Z`;
+
+      // Y-axis labels (3 ticks)
+      const yTicks = [minV, (minV+maxV)/2, maxV].map(v => ({
+        v: +v.toFixed(1),
+        y: py(v),
+      }));
+
+      // X-axis labels (up to 5 evenly spaced)
+      const maxXLabels = Math.min(5, points.length);
+      const step = Math.floor((points.length - 1) / (maxXLabels - 1)) || 1;
+      const xTicks = [];
+      for (let i = 0; i < points.length; i += step) xTicks.push(points[i]);
+      if (xTicks[xTicks.length-1] !== points[points.length-1]) xTicks.push(points[points.length-1]);
+
+      const fmtDate = ts => {
+        const d = new Date(ts);
+        return `${d.getMonth()+1}/${d.getDate()}`;
+      };
+
+      document.getElementById('chartWrap').innerHTML = `
+        <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6c8ef5" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#6c8ef5" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- fill -->
+          <path d="${fillD}" fill="url(#bodyGrad)"/>
+          <!-- line -->
+          <path d="${pathD}" fill="none" stroke="#6c8ef5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          <!-- dots -->
+          ${points.map(p => `<circle cx="${px(p.ts).toFixed(1)}" cy="${py(p.v).toFixed(1)}" r="3" fill="#6c8ef5"/>`).join('')}
+          <!-- y-axis labels -->
+          ${yTicks.map(t => `<text x="${PL-6}" y="${t.y+4}" text-anchor="end" font-size="10" fill="#7986cb">${t.v}</text>`).join('')}
+          <!-- x-axis labels -->
+          ${xTicks.map(p => `<text x="${px(p.ts).toFixed(1)}" y="${H-4}" text-anchor="middle" font-size="10" fill="#7986cb">${fmtDate(p.ts)}</text>`).join('')}
+        </svg>`;
+    }
+
+    function renderBodyTable(rows, availableFields) {
+      const showFields = availableFields.slice(0, 6); // cap columns for readability
+      const reversed = rows.slice().reverse();
+
+      const headers = `<tr><th>Date</th>${showFields.map(f => `<th>${escHtml(f.label)}</th>`).join('')}</tr>`;
+      const body = reversed.map(r => {
+        const d = new Date(r.ts);
+        const dateStr = d.toLocaleDateString([], { month: 'short', day: 'numeric', year: '2-digit' });
+        const cells = showFields.map(f => `<td>${r[f.key] != null ? r[f.key] : '—'}</td>`).join('');
+        return `<tr><td>${escHtml(dateStr)}</td>${cells}</tr>`;
+      }).join('');
+
+      document.getElementById('body-history-table').innerHTML = `
+        <table><thead>${headers}</thead><tbody>${body}</tbody></table>`;
+    }
+
+    // Chart pill clicks
+    document.getElementById('chartPills').addEventListener('click', e => {
+      const pill = e.target.closest('.chart-pill');
+      if (!pill) return;
+      activeBodyField = pill.dataset.field;
+      document.querySelectorAll('.chart-pill').forEach(p => p.classList.toggle('active', p.dataset.field === activeBodyField));
+      renderBodyChart(loadBodyData(), activeBodyField);
+    });
   </script>
 </body>
 </html>
