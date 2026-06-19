@@ -156,9 +156,11 @@ function matchScore(query, description, { curatedBonus = 0, hasData = true } = {
 function bestMatch(query, foods) {
   let best = null, bestScore = -1;
   for (const food of foods) {
-    const isCurated = food.dataType === 'Foundation' || food.dataType === 'SR Legacy';
+    const curatedBonus = food.dataType === 'Foundation' ? 0.15
+      : food.dataType === 'SR Legacy' ? 0.05
+      : 0;
     const score = matchScore(query, food.description, {
-      curatedBonus: isCurated ? 0.1 : 0,
+      curatedBonus,
       hasData: hasUsefulNutrientData(food),
     });
     if (score > bestScore) { bestScore = score; best = food; }
