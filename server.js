@@ -53,12 +53,24 @@ const SUBSTITUTE_MARKERS = new Set([
   // game/exotic animals — penalise when not in the query so "ribeye steak"
   // doesn't match "Game meat, bison, ribeye..."
   'bison','venison','buffalo','elk','ostrich','emu','alligator','game',
+  // poultry-as-substitute: "Bacon, turkey" shouldn't match "bacon";
+  // safe to add because the penalty only fires when NOT in the query,
+  // so "turkey bacon" / "turkey breast" etc. are unaffected.
+  'turkey',
 ]);
 
 // Words that transform a food into a different product category. If present
 // in the description but NOT in the query, the match is likely wrong —
 // e.g. "avocado" should not match "Oil, avocado".
-const TYPE_TRANSFORMERS = new Set(['oil','juice','powder','extract','sauce','milk','cream','flour','syrup','paste','spread','flakes','chips','drink','beverage','supplement','sticks','jerky','nuggets','strips','burger']);
+// Also includes specific oil types (peanut, canola, soybean…) so that
+// oil blends like "Oil, corn, peanut, and olive" lose to pure "Oil, olive"
+// when the query is simply "olive oil".
+const TYPE_TRANSFORMERS = new Set([
+  'oil','juice','powder','extract','sauce','milk','cream','flour','syrup',
+  'paste','spread','flakes','chips','drink','beverage','supplement',
+  'sticks','jerky','nuggets','strips','burger',
+  'peanut','canola','soybean','sunflower','palm','safflower','grapeseed',
+]);
 
 // Egg-part words: "egg white" or "egg yolk" are subsets of "eggs".
 // If the description contains one of these AND "egg" but the query
