@@ -31,12 +31,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px 48px;
+      padding: 24px 16px 64px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     header h1 {
@@ -55,13 +55,47 @@
       font-size: 0.9rem;
     }
 
+    /* ── Tab bar ── */
+    .tabs {
+      display: flex;
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 8px 4px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .tab-btn.active {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    /* ── Shared panel ── */
+    .panel { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 16px; }
+    .panel.hidden { display: none; }
+
+    /* ── Input card ── */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 20px;
-      width: 100%;
-      max-width: 640px;
     }
 
     form { display: flex; flex-direction: column; gap: 12px; }
@@ -73,7 +107,7 @@
       color: var(--text);
       font-size: 1rem;
       line-height: 1.5;
-      min-height: 120px;
+      min-height: 110px;
       padding: 12px;
       resize: vertical;
       width: 100%;
@@ -101,7 +135,6 @@
     button[type="submit"]:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
     .examples {
-      margin-top: 8px;
       color: var(--text-muted);
       font-size: 0.8rem;
     }
@@ -141,8 +174,7 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    #results { width: 100%; max-width: 640px; margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
-
+    /* ── Macro totals card ── */
     .totals-card {
       background: linear-gradient(135deg, #1e2540, #1a2038);
       border: 1px solid var(--accent);
@@ -151,7 +183,7 @@
     }
 
     .totals-card h2 {
-      font-size: 1rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
@@ -172,25 +204,15 @@
       text-align: center;
     }
 
-    .macro-cell .val {
-      font-size: 1.4rem;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .macro-cell .lbl {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-top: 4px;
-    }
+    .macro-cell .val { font-size: 1.4rem; font-weight: 700; line-height: 1; }
+    .macro-cell .lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
 
     .cal .val { color: var(--orange); }
     .pro .val { color: var(--green); }
     .car .val { color: var(--blue); }
     .fat .val { color: var(--red); }
 
+    /* ── Item cards (analyze result) ── */
     .items-list { display: flex; flex-direction: column; gap: 8px; }
 
     .item-card {
@@ -210,25 +232,9 @@
       margin-bottom: 10px;
     }
 
-    .item-name {
-      font-weight: 600;
-      font-size: 0.95rem;
-      text-transform: capitalize;
-    }
-
-    .item-grams {
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      white-space: nowrap;
-      padding-top: 2px;
-    }
-
-    .matched-name {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      margin-bottom: 10px;
-      font-style: italic;
-    }
+    .item-name { font-weight: 600; font-size: 0.95rem; text-transform: capitalize; }
+    .item-grams { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; padding-top: 2px; }
+    .matched-name { color: var(--text-muted); font-size: 0.75rem; margin-bottom: 10px; font-style: italic; }
 
     .item-macros {
       display: grid;
@@ -236,20 +242,186 @@
       gap: 6px;
     }
 
-    .item-macro {
+    .item-macro { background: var(--surface2); border-radius: 6px; padding: 6px 4px; text-align: center; }
+    .item-macro .v { font-size: 0.95rem; font-weight: 600; }
+    .item-macro .l { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 1px; }
+    .not-found-msg { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+
+    /* ── Section headers ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Meal history table ── */
+    .history-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .history-card table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .history-card th {
       background: var(--surface2);
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 10px 12px;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .history-card th:not(:first-child) { text-align: right; }
+
+    .history-card td {
+      border-top: 1px solid var(--border);
+      padding: 10px 12px;
+      vertical-align: middle;
+    }
+
+    .history-card td:not(:first-child) { text-align: right; color: var(--text-muted); }
+
+    .history-card tr:hover td { background: var(--surface2); }
+
+    .meal-time { color: var(--text-muted); font-size: 0.75rem; }
+    .meal-desc { font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+
+    .delete-btn {
+      background: none;
+      border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 6px 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .delete-btn:hover { border-color: var(--red); color: var(--red); background: rgba(239,83,80,0.08); }
+
+    .empty-state {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      padding: 32px;
       text-align: center;
     }
 
-    .item-macro .v { font-size: 0.95rem; font-weight: 600; }
-    .item-macro .l { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 1px; }
+    /* ── Daily running total ── */
+    .day-total-bar {
+      background: var(--surface2);
+      border-radius: 6px;
+      height: 6px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
 
-    .not-found-msg { color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+    .day-total-bar-fill {
+      background: var(--accent);
+      border-radius: 6px;
+      height: 100%;
+      transition: width 0.4s ease;
+    }
+
+    .day-goal-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    /* ── Weekly bar chart ── */
+    .week-chart {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .week-chart h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 140px;
+    }
+
+    .bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .bar-val {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-align: center;
+      min-height: 14px;
+    }
+
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      min-height: 3px;
+      transition: height 0.4s ease;
+    }
+
+    .bar.today { background: var(--accent); }
+    .bar.past   { background: var(--surface2); border: 1px solid var(--border); }
+    .bar.empty  { background: var(--surface2); opacity: 0.4; }
+
+    .bar-day {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .bar-day.today { color: var(--accent); font-weight: 700; }
+
+    .week-macros {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .week-macro { text-align: center; }
+    .week-macro .wv { font-size: 1.1rem; font-weight: 700; }
+    .week-macro .wl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
 
     @media (max-width: 360px) {
       .macro-grid, .item-macros { grid-template-columns: repeat(2, 1fr); }
+      .meal-desc { max-width: 100px; }
     }
   </style>
 </head>
@@ -259,43 +431,118 @@
     <p>Describe your meal in plain English</p>
   </header>
 
-  <div class="card">
-    <form id="mealForm">
-      <textarea
-        id="mealInput"
-        placeholder="e.g. 2 eggs, a cup of oatmeal with a handful of blueberries, and a glass of orange juice"
-        rows="4"
-      ></textarea>
-      <div class="examples">
-        Try:
-        <span>2 scrambled eggs and toast</span>
-        <span>chicken breast with rice and broccoli</span>
-        <span>a bowl of pasta with marinara</span>
-      </div>
-      <button type="submit" id="submitBtn">Analyze Meal</button>
-    </form>
-    <div id="status"></div>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="log">Log Meal</button>
+    <button class="tab-btn" data-tab="today">Today</button>
+    <button class="tab-btn" data-tab="week">This Week</button>
+  </nav>
+
+  <!-- LOG MEAL TAB -->
+  <div class="panel" id="tab-log">
+    <div class="card">
+      <form id="mealForm">
+        <textarea
+          id="mealInput"
+          placeholder="e.g. 2 eggs, a cup of oatmeal with a handful of blueberries, and a glass of orange juice"
+          rows="4"
+        ></textarea>
+        <div class="examples">
+          Try:
+          <span>2 scrambled eggs and toast</span>
+          <span>chicken breast with rice and broccoli</span>
+          <span>a bowl of pasta with marinara</span>
+        </div>
+        <button type="submit" id="submitBtn">Analyze Meal</button>
+      </form>
+      <div id="status"></div>
+    </div>
+    <div id="results"></div>
   </div>
 
-  <div id="results"></div>
+  <!-- TODAY TAB -->
+  <div class="panel hidden" id="tab-today">
+    <div id="today-totals"></div>
+    <div>
+      <div class="section-header" style="margin-bottom:10px">
+        <span class="section-title">Today's Meals</span>
+      </div>
+      <div class="history-card" id="today-table"></div>
+    </div>
+  </div>
+
+  <!-- WEEK TAB -->
+  <div class="panel hidden" id="tab-week">
+    <div class="week-chart" id="week-chart"></div>
+    <div>
+      <div class="section-header" style="margin-bottom:10px">
+        <span class="section-title">Meal History</span>
+      </div>
+      <div class="history-card" id="week-table"></div>
+    </div>
+  </div>
 
   <script>
-    const form = document.getElementById('mealForm');
-    const input = document.getElementById('mealInput');
-    const btn = document.getElementById('submitBtn');
-    const status = document.getElementById('status');
-    const results = document.getElementById('results');
+    // ── Storage ──────────────────────────────────────────────────────────────
+    const STORAGE_KEY = 'calorie_tracker_meals';
 
-    document.querySelectorAll('.examples span').forEach(chip => {
-      chip.addEventListener('click', () => {
-        input.value = chip.textContent;
-        input.focus();
+    function loadMeals() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveMeals(meals) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(meals));
+    }
+
+    function deleteMeal(id) {
+      saveMeals(loadMeals().filter(m => m.id !== id));
+      refreshAllViews();
+    }
+
+    // ── Date helpers ─────────────────────────────────────────────────────────
+    function dateKey(ts) {
+      const d = new Date(ts);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function todayKey() { return dateKey(Date.now()); }
+
+    function formatTime(ts) {
+      return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatDate(key) {
+      const [y, m, d] = key.split('-').map(Number);
+      return new Date(y, m-1, d).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+
+    // ── Tabs ─────────────────────────────────────────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+        if (btn.dataset.tab === 'today') renderToday();
+        if (btn.dataset.tab === 'week')  renderWeek();
       });
     });
 
+    // ── Example chips ────────────────────────────────────────────────────────
+    document.querySelectorAll('.examples span').forEach(chip => {
+      chip.addEventListener('click', () => { mealInput.value = chip.textContent; mealInput.focus(); });
+    });
+
+    // ── Form submit ──────────────────────────────────────────────────────────
+    const form     = document.getElementById('mealForm');
+    const mealInput = document.getElementById('mealInput');
+    const btn      = document.getElementById('submitBtn');
+    const status   = document.getElementById('status');
+    const results  = document.getElementById('results');
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const description = input.value.trim();
+      const description = mealInput.value.trim();
       if (!description) return;
 
       btn.disabled = true;
@@ -311,11 +558,22 @@
         });
 
         const data = await res.json();
-
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
 
+        // Save to localStorage
+        const meal = {
+          id: crypto.randomUUID(),
+          ts: Date.now(),
+          description,
+          items: data.items,
+          totals: data.totals,
+        };
+        const meals = loadMeals();
+        meals.push(meal);
+        saveMeals(meals);
+
         status.innerHTML = '';
-        renderResults(data);
+        renderAnalyzeResult(data);
       } catch (err) {
         status.className = 'error';
         status.textContent = `Error: ${err.message}`;
@@ -324,37 +582,141 @@
       }
     });
 
-    function renderResults({ items, totals }) {
-      const html = `
-        <div class="totals-card">
-          <h2>Total Nutrition</h2>
-          <div class="macro-grid">
-            <div class="macro-cell cal">
-              <div class="val">${totals.calories}</div>
-              <div class="lbl">Calories</div>
-            </div>
-            <div class="macro-cell pro">
-              <div class="val">${totals.protein}g</div>
-              <div class="lbl">Protein</div>
-            </div>
-            <div class="macro-cell car">
-              <div class="val">${totals.carbs}g</div>
-              <div class="lbl">Carbs</div>
-            </div>
-            <div class="macro-cell fat">
-              <div class="val">${totals.fat}g</div>
-              <div class="lbl">Fat</div>
-            </div>
-          </div>
-        </div>
-        <div class="items-list">
-          ${items.map(renderItem).join('')}
-        </div>
+    // ── Analyze result (Log tab) ─────────────────────────────────────────────
+    function renderAnalyzeResult({ items, totals }) {
+      results.innerHTML = `
+        ${macroTotalsHTML(totals, 'Meal Nutrition')}
+        <div class="items-list">${items.map(itemCardHTML).join('')}</div>
       `;
-      results.innerHTML = html;
     }
 
-    function renderItem(item) {
+    // ── Today tab ────────────────────────────────────────────────────────────
+    function renderToday() {
+      const meals = loadMeals().filter(m => dateKey(m.ts) === todayKey());
+      const totals = sumTotals(meals);
+      const GOAL = 2000;
+
+      const pct = Math.min(100, Math.round((totals.calories / GOAL) * 100));
+
+      document.getElementById('today-totals').innerHTML = `
+        ${macroTotalsHTML(totals, 'Today\'s Running Total')}
+        <div class="day-total-bar"><div class="day-total-bar-fill" style="width:${pct}%"></div></div>
+        <div class="day-goal-label">${totals.calories} / ${GOAL} kcal goal (${pct}%)</div>
+      `;
+
+      document.getElementById('today-table').innerHTML = mealsTableHTML(meals);
+    }
+
+    // ── Week tab ─────────────────────────────────────────────────────────────
+    function renderWeek() {
+      const allMeals = loadMeals();
+      const today = new Date();
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const key = dateKey(d.getTime());
+        const dayMeals = allMeals.filter(m => dateKey(m.ts) === key);
+        const totals = sumTotals(dayMeals);
+        days.push({ key, d, totals, isToday: i === 0 });
+      }
+
+      const maxCal = Math.max(100, ...days.map(d => d.totals.calories));
+      const weekTotals = sumTotals(allMeals.filter(m => {
+        const d = new Date(); d.setDate(d.getDate() - 6);
+        return m.ts >= d.getTime();
+      }));
+
+      const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+      const barsHTML = days.map(({ d, totals, isToday }) => {
+        const heightPct = totals.calories > 0 ? Math.max(4, (totals.calories / maxCal) * 100) : 0;
+        const cls = isToday ? 'today' : totals.calories > 0 ? 'past' : 'empty';
+        return `
+          <div class="bar-col">
+            <div class="bar-val">${totals.calories > 0 ? totals.calories : ''}</div>
+            <div class="bar ${cls}" style="height:${heightPct}%"></div>
+            <div class="bar-day ${isToday ? 'today' : ''}">${dayLabels[d.getDay()]}</div>
+          </div>`;
+      }).join('');
+
+      document.getElementById('week-chart').innerHTML = `
+        <h2>7-Day Overview</h2>
+        <div class="bar-chart">${barsHTML}</div>
+        <div class="week-macros">
+          <div class="week-macro"><div class="wv" style="color:var(--orange)">${weekTotals.calories}</div><div class="wl">kcal</div></div>
+          <div class="week-macro"><div class="wv" style="color:var(--green)">${weekTotals.protein}g</div><div class="wl">protein</div></div>
+          <div class="week-macro"><div class="wv" style="color:var(--blue)">${weekTotals.carbs}g</div><div class="wl">carbs</div></div>
+          <div class="week-macro"><div class="wv" style="color:var(--red)">${weekTotals.fat}g</div><div class="wl">fat</div></div>
+        </div>
+      `;
+
+      // Full meal history table (all 7 days, newest first)
+      const weekMeals = allMeals.filter(m => {
+        const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 6); cutoff.setHours(0,0,0,0);
+        return m.ts >= cutoff.getTime();
+      }).slice().reverse();
+
+      document.getElementById('week-table').innerHTML = mealsTableHTML(weekMeals, true);
+    }
+
+    // ── Shared helpers ───────────────────────────────────────────────────────
+    function sumTotals(meals) {
+      return meals.reduce((acc, m) => ({
+        calories: acc.calories + m.totals.calories,
+        protein:  Math.round((acc.protein  + m.totals.protein)  * 10) / 10,
+        carbs:    Math.round((acc.carbs    + m.totals.carbs)    * 10) / 10,
+        fat:      Math.round((acc.fat      + m.totals.fat)      * 10) / 10,
+      }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    }
+
+    function macroTotalsHTML(totals, label) {
+      return `
+        <div class="totals-card">
+          <h2>${escHtml(label)}</h2>
+          <div class="macro-grid">
+            <div class="macro-cell cal"><div class="val">${totals.calories}</div><div class="lbl">Calories</div></div>
+            <div class="macro-cell pro"><div class="val">${totals.protein}g</div><div class="lbl">Protein</div></div>
+            <div class="macro-cell car"><div class="val">${totals.carbs}g</div><div class="lbl">Carbs</div></div>
+            <div class="macro-cell fat"><div class="val">${totals.fat}g</div><div class="lbl">Fat</div></div>
+          </div>
+        </div>`;
+    }
+
+    function mealsTableHTML(meals, showDate = false) {
+      if (meals.length === 0) {
+        return '<div class="empty-state">No meals logged yet</div>';
+      }
+      const rows = meals.map(m => `
+        <tr>
+          <td>
+            <div class="meal-desc" title="${escHtml(m.description)}">${escHtml(m.description)}</div>
+            <div class="meal-time">${showDate ? formatDate(dateKey(m.ts)) + ' · ' : ''}${formatTime(m.ts)}</div>
+          </td>
+          <td style="color:var(--orange)">${m.totals.calories}</td>
+          <td style="color:var(--green)">${m.totals.protein}g</td>
+          <td style="color:var(--blue)">${m.totals.carbs}g</td>
+          <td style="color:var(--red)">${m.totals.fat}g</td>
+          <td><button class="delete-btn" data-id="${escHtml(m.id)}">Delete</button></td>
+        </tr>`).join('');
+
+      return `
+        <table>
+          <thead>
+            <tr>
+              <th>Meal</th>
+              <th>kcal</th>
+              <th>Pro</th>
+              <th>Carbs</th>
+              <th>Fat</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    function itemCardHTML(item) {
       if (!item.found) {
         return `
           <div class="item-card not-found">
@@ -365,7 +727,6 @@
             <div class="not-found-msg">Could not find nutritional data</div>
           </div>`;
       }
-
       return `
         <div class="item-card">
           <div class="item-header">
@@ -374,28 +735,31 @@
           </div>
           ${item.matched_name ? `<div class="matched-name">Matched: ${escHtml(item.matched_name)}</div>` : ''}
           <div class="item-macros">
-            <div class="item-macro">
-              <div class="v" style="color:var(--orange)">${item.calories}</div>
-              <div class="l">kcal</div>
-            </div>
-            <div class="item-macro">
-              <div class="v" style="color:var(--green)">${item.protein}g</div>
-              <div class="l">protein</div>
-            </div>
-            <div class="item-macro">
-              <div class="v" style="color:var(--blue)">${item.carbs}g</div>
-              <div class="l">carbs</div>
-            </div>
-            <div class="item-macro">
-              <div class="v" style="color:var(--red)">${item.fat}g</div>
-              <div class="l">fat</div>
-            </div>
+            <div class="item-macro"><div class="v" style="color:var(--orange)">${item.calories}</div><div class="l">kcal</div></div>
+            <div class="item-macro"><div class="v" style="color:var(--green)">${item.protein}g</div><div class="l">protein</div></div>
+            <div class="item-macro"><div class="v" style="color:var(--blue)">${item.carbs}g</div><div class="l">carbs</div></div>
+            <div class="item-macro"><div class="v" style="color:var(--red)">${item.fat}g</div><div class="l">fat</div></div>
           </div>
         </div>`;
     }
 
     function escHtml(str) {
       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Delete button delegation ─────────────────────────────────────────────
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.delete-btn');
+      if (!btn) return;
+      const id = btn.dataset.id;
+      if (!id) return;
+      deleteMeal(id);
+    });
+
+    function refreshAllViews() {
+      const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+      if (activeTab === 'today') renderToday();
+      if (activeTab === 'week')  renderWeek();
     }
   </script>
 </body>
