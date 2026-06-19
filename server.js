@@ -58,11 +58,28 @@ const SUBSTITUTE_MARKERS = new Set([
 // Words that transform a food into a different product category. If present
 // in the description but NOT in the query, the match is likely wrong —
 // e.g. "avocado" should not match "Oil, avocado".
-const TYPE_TRANSFORMERS = new Set(['oil','juice','powder','extract','sauce','milk','cream','flour','syrup','paste','spread','flakes','chips','drink','beverage','supplement']);
+const TYPE_TRANSFORMERS = new Set(['oil','juice','powder','extract','sauce','milk','cream','flour','syrup','paste','spread','flakes','chips','drink','beverage','supplement','sticks','jerky','nuggets','strips','burger']);
+
+// Egg-part words: "egg white" or "egg yolk" are subsets of "eggs".
+// If the description contains one of these AND "egg" but the query
+// doesn't mention the part word, prefer a whole-egg entry instead.
+const EGG_PART_WORDS = new Set(['white', 'yolk', 'albumen']);
+
+// Check whether a USDA food search-result entry has any useful macro data.
+// Entries with zero calories + zero protein + zero fat have missing data in
+// the USDA database and should be strongly de-ranked.
+function hasUsefulNutrientData(food) {
+  if (!food.foodNutrients?.length) return false;
+  const sum = food.foodNutrients.reduce((acc, n) => {
+    if ([1008, 2047, 2048, 1003, 1004].includes(n.nutrientId)) acc += (n.value ?? 0);
+    return acc;
+  }, 0);
+  return sum > 0;
+}
 
 // Score how well a USDA food description matches the query.
 // Returns 0–1; higher is better.
-function matchScore(query, description, { curatedBonus = 0 } = {}) {
+function matchScore(query, description, { curatedBonus = 0, hasData = true } = {}) {
   const queryWords = normalize(query);
   const descWordArr = normalize(description);
   const descWords   = new Set(descWordArr);
@@ -105,16 +122,33 @@ function matchScore(query, description, { curatedBonus = 0 } = {}) {
     m => descWords.has(m) && !queryWords.includes(m)
   );
 
-  const penalty = hasUnwantedSubstitute ? 0.2 : hasUnwantedTransformer ? 0.5 : 1.0;
+  // Egg-part penalty: "egg white" / "egg yolk" are subsets of "eggs".
+  // If the description has an egg-part word and the query doesn't, prefer whole.
+  const isEggDescription = descWords.has('egg') || descWords.has('eggs');
+  const hasUnwantedEggPart = isEggDescription && [...EGG_PART_WORDS].some(
+    m => descWords.has(m) && !queryWords.includes(m)
+  );
 
-  return (recall * 0.8 + lengthPenalty * 0.2) * coreBoost * penalty + curatedBonus;
+  // Missing-data penalty: USDA entries with zero calories + protein + fat are
+  // placeholder rows with no nutritional information — rank them near the bottom.
+  const dataPenalty = hasData ? 1.0 : 0.1;
+
+  const penalty = hasUnwantedSubstitute ? 0.2
+    : hasUnwantedTransformer ? 0.5
+    : hasUnwantedEggPart     ? 0.6
+    : 1.0;
+
+  return (recall * 0.8 + lengthPenalty * 0.2) * coreBoost * penalty * dataPenalty + curatedBonus;
 }
 
 function bestMatch(query, foods) {
   let best = null, bestScore = -1;
   for (const food of foods) {
     const isCurated = food.dataType === 'Foundation' || food.dataType === 'SR Legacy';
-    const score = matchScore(query, food.description, { curatedBonus: isCurated ? 0.1 : 0 });
+    const score = matchScore(query, food.description, {
+      curatedBonus: isCurated ? 0.1 : 0,
+      hasData: hasUsefulNutrientData(food),
+    });
     if (score > bestScore) { bestScore = score; best = food; }
   }
   return best;
@@ -123,7 +157,7 @@ function bestMatch(query, foods) {
 async function fetchUSDA(query, dataType) {
   // URLSearchParams encodes commas and spaces in dataType, which USDA rejects.
   // Build base params normally then append dataType with only spaces encoded.
-  const params = new URLSearchParams({ query, pageSize: '5', api_key: USDA_API_KEY });
+  const params = new URLSearchParams({ query, pageSize: '8', api_key: USDA_API_KEY });
   const url = `${USDA_BASE}/foods/search?${params}&dataType=${encodeURIComponent(dataType).replace(/%2C/g, ',')}`;
   const res = await fetch(url);
   if (!res.ok) return [];
