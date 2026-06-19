@@ -42,13 +42,56 @@ Meal: ${description}`
   return JSON.parse(match[0]);
 }
 
-async function searchUSDA(foodName) {
-  const url = `${USDA_BASE}/foods/search?query=${encodeURIComponent(foodName)}&pageSize=1&api_key=${USDA_API_KEY}`;
-  const res = await fetch(url);
+// Score how well a USDA food description matches the query.
+// Returns 0–1; higher is better.
+function matchScore(query, description) {
+  const normalize = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+  const queryWords = normalize(query);
+  const descWords  = new Set(normalize(description));
+
+  if (queryWords.length === 0) return 0;
+
+  // Fraction of query words found in the description
+  const hits = queryWords.filter(w => descWords.has(w)).length;
+  const recall = hits / queryWords.length;
+
+  // Penalise very long descriptions (branded items tend to be verbose)
+  const lengthPenalty = Math.min(1, 10 / Math.max(10, descWords.size));
+
+  return recall * 0.85 + lengthPenalty * 0.15;
+}
+
+function bestMatch(query, foods) {
+  let best = null, bestScore = -1;
+  for (const food of foods) {
+    const score = matchScore(query, food.description);
+    if (score > bestScore) { bestScore = score; best = food; }
+  }
+  return best;
+}
+
+async function fetchUSDA(query, dataType) {
+  const params = new URLSearchParams({
+    query,
+    pageSize: '5',
+    dataType,
+    api_key: USDA_API_KEY,
+  });
+  const res = await fetch(`${USDA_BASE}/foods/search?${params}`);
   if (!res.ok) throw new Error(`USDA search failed: ${res.status}`);
   const data = await res.json();
-  if (!data.foods || data.foods.length === 0) return null;
-  return data.foods[0];
+  return data.foods ?? [];
+}
+
+async function searchUSDA(foodName) {
+  // Prefer Foundation + SR Legacy (curated, generic foods)
+  const curated = await fetchUSDA(foodName, 'Foundation,SR Legacy');
+  if (curated.length > 0) return bestMatch(foodName, curated);
+
+  // Fall back to all data types (includes Branded) if nothing curated found
+  const all = await fetchUSDA(foodName, 'Foundation,SR Legacy,Branded,Survey (FNDDS)');
+  if (all.length === 0) return null;
+  return bestMatch(foodName, all);
 }
 
 function getNutrient(food, nutrientIds) {
