@@ -516,6 +516,130 @@
     .week-macro .wv { font-size: 1.1rem; font-weight: 700; }
     .week-macro .wl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
 
+    /* ── Profile form ── */
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .profile-card h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 14px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .profile-field { display: flex; flex-direction: column; gap: 5px; }
+    .profile-field.full { grid-column: 1 / -1; }
+
+    .profile-field label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .profile-field input,
+    .profile-field select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 9px 12px;
+      width: 100%;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .profile-field input:focus,
+    .profile-field select:focus { outline: none; border-color: var(--accent); }
+
+    .profile-field select option { background: var(--surface2); }
+
+    .profile-actions { display: flex; gap: 8px; }
+
+    .profile-save-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      flex: 1;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 10px;
+      transition: background 0.2s;
+    }
+
+    .profile-save-btn:hover { background: var(--accent-hover); }
+
+    .profile-edit-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 8px 16px;
+      transition: all 0.15s;
+    }
+
+    .profile-edit-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Targets card ── */
+    .targets-card {
+      background: linear-gradient(135deg, #1a2538, #1e2040);
+      border: 1px solid #3a5080;
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .targets-card h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #7ab0e0;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 14px;
+    }
+
+    .targets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .target-cell {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+
+    .target-cell .tv { font-size: 1.35rem; font-weight: 700; line-height: 1; }
+    .target-cell .tl { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+    .target-cell .tsub { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+    .targets-note {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
     /* ── Body tab ── */
     .upload-area {
       border: 2px dashed var(--border);
@@ -756,6 +880,56 @@
 
   <!-- BODY TAB -->
   <div class="panel hidden" id="tab-body">
+    <!-- Profile form -->
+    <div class="profile-card" id="profileCard">
+      <h3>Your Profile</h3>
+      <div id="profileForm">
+        <div class="profile-grid">
+          <div class="profile-field">
+            <label for="pHeight">Height (cm)</label>
+            <input id="pHeight" type="number" min="100" max="250" placeholder="175">
+          </div>
+          <div class="profile-field">
+            <label for="pAge">Age</label>
+            <input id="pAge" type="number" min="10" max="120" placeholder="30">
+          </div>
+          <div class="profile-field">
+            <label for="pSex">Sex</label>
+            <select id="pSex">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div class="profile-field">
+            <label for="pActivity">Activity Level</label>
+            <select id="pActivity">
+              <option value="1.2">Sedentary (desk job, no exercise)</option>
+              <option value="1.375">Lightly active (1–3 days/wk)</option>
+              <option value="1.55" selected>Moderately active (3–5 days/wk)</option>
+              <option value="1.725">Very active (6–7 days/wk)</option>
+              <option value="1.9">Extra active (athlete / physical job)</option>
+            </select>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button class="profile-save-btn" id="profileSaveBtn">Save Profile</button>
+        </div>
+      </div>
+      <div id="profileSummary" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span id="profileSummaryText" style="font-size:0.88rem;color:var(--text-muted)"></span>
+          <button class="profile-edit-btn" id="profileEditBtn">Edit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Targets card -->
+    <div class="targets-card" id="targetsCard" style="display:none">
+      <h3>Daily Targets</h3>
+      <div class="targets-grid" id="targetsGrid"></div>
+      <div class="targets-note" id="targetsNote"></div>
+    </div>
+
     <!-- Upload card -->
     <div class="card" id="body-upload-card">
       <label class="upload-area" id="uploadArea">
@@ -1225,6 +1399,7 @@
           const merged   = mergeBodyData(loadBodyData(), incoming);
           saveBodyData(merged);
           renderBody();
+          renderTargets(); // recalculate with latest weight/body fat
         } catch (err) {
           alert('Could not parse CSV: ' + err.message);
         }
@@ -1399,6 +1574,148 @@
       document.querySelectorAll('.chart-pill').forEach(p => p.classList.toggle('active', p.dataset.field === activeBodyField));
       renderBodyChart(loadBodyData(), activeBodyField);
     });
+
+    // ── Profile & targets ─────────────────────────────────────────────────────
+    const PROFILE_KEY = 'calorie_tracker_profile';
+
+    function loadProfile() {
+      try { return JSON.parse(localStorage.getItem(PROFILE_KEY)) || null; }
+      catch { return null; }
+    }
+
+    function saveProfile(p) {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
+    }
+
+    const ACTIVITY_LABELS = {
+      '1.2':   'Sedentary',
+      '1.375': 'Lightly active',
+      '1.55':  'Moderately active',
+      '1.725': 'Very active',
+      '1.9':   'Extra active',
+    };
+
+    function calcTargets(profile, bodyRows) {
+      // Use most recent RENPHO weight & body fat if available, else no body data
+      const latest = bodyRows.length ? bodyRows[bodyRows.length - 1] : null;
+      const weight = latest?.weight ?? null;
+      const bodyFatPct = latest?.bodyFat ?? null;
+
+      if (!weight) return null;
+
+      const { height, age, sex, activity } = profile;
+
+      // Mifflin-St Jeor BMR
+      const bmr = Math.round(
+        10 * weight + 6.25 * height - 5 * age + (sex === 'male' ? 5 : -161)
+      );
+
+      const tdee = Math.round(bmr * parseFloat(activity));
+
+      // ~18% deficit (sits in 15–20% range)
+      const cuttingCals = Math.round(tdee * 0.82);
+
+      // Protein: 2.2 g/kg lean mass if body fat known, else 2.0 g/kg bodyweight
+      let proteinTarget, proteinBasis;
+      if (bodyFatPct != null) {
+        const leanMass = weight * (1 - bodyFatPct / 100);
+        proteinTarget = Math.round(leanMass * 2.2);
+        proteinBasis = `2.2 g/kg lean mass (${leanMass.toFixed(1)} kg)`;
+      } else {
+        proteinTarget = Math.round(weight * 2.0);
+        proteinBasis = '2.0 g/kg bodyweight';
+      }
+
+      return { bmr, tdee, cuttingCals, proteinTarget, proteinBasis, weight, bodyFatPct };
+    }
+
+    function renderTargets() {
+      const profile  = loadProfile();
+      const bodyRows = loadBodyData();
+      const card     = document.getElementById('targetsCard');
+
+      if (!profile) { card.style.display = 'none'; return; }
+
+      const t = calcTargets(profile, bodyRows);
+      if (!t) { card.style.display = 'none'; return; }
+
+      card.style.display = '';
+      document.getElementById('targetsGrid').innerHTML = `
+        <div class="target-cell">
+          <div class="tv" style="color:var(--text-muted)">${t.bmr}</div>
+          <div class="tl">BMR</div>
+          <div class="tsub">kcal/day at rest</div>
+        </div>
+        <div class="target-cell">
+          <div class="tv" style="color:var(--blue)">${t.tdee}</div>
+          <div class="tl">TDEE</div>
+          <div class="tsub">${ACTIVITY_LABELS[profile.activity] ?? ''}</div>
+        </div>
+        <div class="target-cell">
+          <div class="tv" style="color:var(--orange)">${t.cuttingCals}</div>
+          <div class="tl">Cut Target</div>
+          <div class="tsub">~18% deficit</div>
+        </div>
+        <div class="target-cell">
+          <div class="tv" style="color:var(--green)">${t.proteinTarget}g</div>
+          <div class="tl">Protein</div>
+          <div class="tsub">daily target</div>
+        </div>
+      `;
+      document.getElementById('targetsNote').innerHTML =
+        `Based on ${t.weight} kg${t.bodyFatPct != null ? `, ${t.bodyFatPct}% body fat` : ''} · ${t.proteinBasis} · Mifflin-St Jeor`;
+    }
+
+    function renderProfileUI() {
+      const p = loadProfile();
+      const form    = document.getElementById('profileForm');
+      const summary = document.getElementById('profileSummary');
+
+      if (p) {
+        // Populate fields (keeps form in sync if user re-edits)
+        document.getElementById('pHeight').value   = p.height;
+        document.getElementById('pAge').value      = p.age;
+        document.getElementById('pSex').value      = p.sex;
+        document.getElementById('pActivity').value = p.activity;
+
+        form.style.display    = 'none';
+        summary.style.display = '';
+        document.getElementById('profileSummaryText').textContent =
+          `${p.height} cm · ${p.age} yrs · ${p.sex === 'male' ? 'Male' : 'Female'} · ${ACTIVITY_LABELS[p.activity] ?? p.activity}`;
+      } else {
+        form.style.display    = '';
+        summary.style.display = 'none';
+      }
+
+      renderTargets();
+    }
+
+    document.getElementById('profileSaveBtn').addEventListener('click', () => {
+      const height   = parseFloat(document.getElementById('pHeight').value);
+      const age      = parseInt(document.getElementById('pAge').value);
+      const sex      = document.getElementById('pSex').value;
+      const activity = document.getElementById('pActivity').value;
+
+      if (!height || !age || height < 100 || age < 10) {
+        alert('Please enter a valid height and age.');
+        return;
+      }
+
+      saveProfile({ height, age, sex, activity });
+      renderProfileUI();
+    });
+
+    document.getElementById('profileEditBtn').addEventListener('click', () => {
+      document.getElementById('profileForm').style.display    = '';
+      document.getElementById('profileSummary').style.display = 'none';
+    });
+
+    // Initialise profile UI when Body tab is first shown
+    const _origRenderBody = renderBody;
+    renderBody = function() {
+      renderProfileUI();
+      _origRenderBody();
+    };
   </script>
 </body>
 </html>
