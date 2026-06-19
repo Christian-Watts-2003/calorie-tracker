@@ -45,7 +45,7 @@ Meal: ${description}`
 // Score how well a USDA food description matches the query.
 // Returns 0–1; higher is better.
 function matchScore(query, description) {
-  const normalize = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+  const normalize = s => s.toLowerCase().replace(/[-_]/g, ' ').replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
   const queryWords = normalize(query);
   const descWords  = new Set(normalize(description));
 
@@ -58,7 +58,13 @@ function matchScore(query, description) {
   // Penalise very long descriptions (branded items tend to be verbose)
   const lengthPenalty = Math.min(1, 10 / Math.max(10, descWords.size));
 
-  return recall * 0.85 + lengthPenalty * 0.15;
+  // The last word in the query is the primary food noun (e.g. "bacon" in
+  // "low-fat bacon"). If it's absent from the description, heavily penalise
+  // so that modifier-only matches (e.g. "Buttermilk, low fat") don't win.
+  const coreWord = queryWords[queryWords.length - 1];
+  const coreBoost = descWords.has(coreWord) ? 1.0 : 0.15;
+
+  return (recall * 0.85 + lengthPenalty * 0.15) * coreBoost;
 }
 
 function bestMatch(query, foods) {
