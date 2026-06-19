@@ -182,10 +182,10 @@ function bestMatch(query, foods) {
   return best;
 }
 
-async function fetchUSDA(query, dataType) {
+async function fetchUSDA(query, dataType, pageSize = '20') {
   // URLSearchParams encodes commas and spaces in dataType, which USDA rejects.
   // Build base params normally then append dataType with only spaces encoded.
-  const params = new URLSearchParams({ query, pageSize: '20', api_key: USDA_API_KEY });
+  const params = new URLSearchParams({ query, pageSize, api_key: USDA_API_KEY });
   const url = `${USDA_BASE}/foods/search?${params}&dataType=${encodeURIComponent(dataType).replace(/%2C/g, ',')}`;
   const res = await fetch(url);
   if (!res.ok) return [];
@@ -198,9 +198,11 @@ async function searchUSDA(foodName) {
   // ensures Foundation/SR Legacy entries are always in the candidate pool —
   // a single combined API call lets USDA's own ranking bury them past our
   // page limit when a branded exact-name match sits at position 1.
+  // Use a larger page size for the curated pool since there are fewer entries
+  // and they can rank lower than branded results in USDA's relevance ordering.
   const [curated, branded] = await Promise.all([
-    fetchUSDA(foodName, 'Foundation,SR Legacy'),
-    fetchUSDA(foodName, 'Branded,Survey (FNDDS)'),
+    fetchUSDA(foodName, 'Foundation,SR Legacy', '50'),
+    fetchUSDA(foodName, 'Branded,Survey (FNDDS)', '20'),
   ]);
   const all = [...curated, ...branded];
   if (all.length === 0) return null;
