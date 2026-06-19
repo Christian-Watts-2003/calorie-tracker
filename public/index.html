@@ -1014,47 +1014,47 @@
   </div>
 
   <script>
-    // ── Password gate ────────────────────────────────────────────────────────
-    const GATE_PASS   = '1234';
-    const GATE_SESSION_KEY = 'ct_authed';
+    // // ── Password gate ────────────────────────────────────────────────────────
+    // const GATE_PASS   = '1234';
+    // const GATE_SESSION_KEY = 'ct_authed';
 
-    const gate      = document.getElementById('gate');
-    const gateInput = document.getElementById('gateInput');
-    const gateBtn   = document.getElementById('gateBtn');
-    const gateError = document.getElementById('gateError');
-    const gateToggle = document.getElementById('gateToggle');
+    // const gate      = document.getElementById('gate');
+    // const gateInput = document.getElementById('gateInput');
+    // const gateBtn   = document.getElementById('gateBtn');
+    // const gateError = document.getElementById('gateError');
+    // const gateToggle = document.getElementById('gateToggle');
 
-    function unlock() {
-      gate.classList.add('hidden');
-    }
+    // function unlock() {
+    //   gate.classList.add('hidden');
+    // }
 
-    function tryUnlock() {
-      if (gateInput.value === GATE_PASS) {
-        sessionStorage.setItem(GATE_SESSION_KEY, '1');
-        unlock();
-      } else {
-        gateError.textContent = 'Incorrect password';
-        gateInput.classList.remove('shake');
-        void gateInput.offsetWidth; // reflow to restart animation
-        gateInput.classList.add('shake');
-        gateInput.value = '';
-        setTimeout(() => gateInput.classList.remove('shake'), 400);
-      }
-    }
+    // function tryUnlock() {
+    //   if (gateInput.value === GATE_PASS) {
+    //     sessionStorage.setItem(GATE_SESSION_KEY, '1');
+    //     unlock();
+    //   } else {
+    //     gateError.textContent = 'Incorrect password';
+    //     gateInput.classList.remove('shake');
+    //     void gateInput.offsetWidth; // reflow to restart animation
+    //     gateInput.classList.add('shake');
+    //     gateInput.value = '';
+    //     setTimeout(() => gateInput.classList.remove('shake'), 400);
+    //   }
+    // }
 
-    if (sessionStorage.getItem(GATE_SESSION_KEY) === '1') {
-      unlock();
-    } else {
-      gateInput.focus();
-    }
+    // if (sessionStorage.getItem(GATE_SESSION_KEY) === '1') {
+    //   unlock();
+    // } else {
+    //   gateInput.focus();
+    // }
 
-    gateBtn.addEventListener('click', tryUnlock);
-    gateInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
-    gateToggle.addEventListener('click', () => {
-      const show = gateInput.type === 'password';
-      gateInput.type = show ? 'text' : 'password';
-      gateToggle.textContent = show ? '🙈' : '👁';
-    });
+    // gateBtn.addEventListener('click', tryUnlock);
+    // gateInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+    // gateToggle.addEventListener('click', () => {
+    //   const show = gateInput.type === 'password';
+    //   gateInput.type = show ? 'text' : 'password';
+    //   gateToggle.textContent = show ? '🙈' : '👁';
+    // });
 
     // ── Storage ──────────────────────────────────────────────────────────────
     const STORAGE_KEY = 'calorie_tracker_meals';
