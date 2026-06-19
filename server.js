@@ -78,13 +78,11 @@ function bestMatch(query, foods) {
 }
 
 async function fetchUSDA(query, dataType) {
-  const params = new URLSearchParams({
-    query,
-    pageSize: '5',
-    dataType,
-    api_key: USDA_API_KEY,
-  });
-  const res = await fetch(`${USDA_BASE}/foods/search?${params}`);
+  // URLSearchParams encodes commas and spaces in dataType, which USDA rejects.
+  // Build the base params normally, then append dataType raw.
+  const params = new URLSearchParams({ query, pageSize: '5', api_key: USDA_API_KEY });
+  const url = `${USDA_BASE}/foods/search?${params}&dataType=${dataType.replace(/ /g, '%20')}`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`USDA search failed: ${res.status}`);
   const data = await res.json();
   return data.foods ?? [];
