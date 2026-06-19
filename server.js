@@ -205,12 +205,52 @@ async function fetchUSDA(query, dataType, pageSize = '20') {
   return data.foods ?? [];
 }
 
+async function fetchOpenFoodFacts(query) {
+  try {
+    const params = new URLSearchParams({
+      search_terms: query,
+      search_simple: '1',
+      action: 'process',
+      json: '1',
+      page_size: '20',
+      fields: 'product_name,brands,nutriments',
+    });
+    const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?${params}`, {
+      headers: { 'User-Agent': 'CalorieTracker/1.0' },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    // Normalise to the same shape the scorer expects
+    return (data.products ?? [])
+      .filter(p => p.product_name && p.nutriments?.['energy-kcal_100g'] != null)
+      .map(p => {
+        const n = p.nutriments;
+        const brand = p.brands ? p.brands.split(',')[0].trim() : '';
+        const description = brand ? `${p.product_name}, ${brand}` : p.product_name;
+        return {
+          description,
+          dataType: 'Branded',
+          source: 'off',
+          foodNutrients: [
+            { nutrientId: 1008, value: n['energy-kcal_100g'] ?? 0 },
+            { nutrientId: 1003, value: n['proteins_100g']    ?? 0 },
+            { nutrientId: 1005, value: n['carbohydrates_100g'] ?? 0 },
+            { nutrientId: 1004, value: n['fat_100g']          ?? 0 },
+          ],
+        };
+      });
+  } catch {
+    return [];
+  }
+}
+
 async function searchUSDA(foodName) {
-  const [curated, branded] = await Promise.all([
+  const [curated, branded, off] = await Promise.all([
     fetchUSDA(foodName, 'Foundation,SR Legacy', '50'),
     fetchUSDA(foodName, 'Branded,Survey (FNDDS)', '20'),
+    fetchOpenFoodFacts(foodName),
   ]);
-  const all = [...curated, ...branded];
+  const all = [...curated, ...branded, ...off];
   if (all.length === 0) return null;
 
   // Debug: log all candidates with scores so we can see what the pool looks like
